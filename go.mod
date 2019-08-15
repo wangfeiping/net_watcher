@@ -1,0 +1,10 @@
+module github.com/wangfeiping/net_watcher
+
+go 1.12
+
+require (
+	github.com/QOSGroup/qstars v0.4.1
+	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575
+	github.com/spf13/cobra v0.0.5
+	github.com/spf13/viper v1.4.0
+)
