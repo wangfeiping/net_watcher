@@ -1,15 +1,22 @@
 package main
 
 import (
+	"github.com/spf13/viper"
 	"github.com/wangfeiping/net_watcher/commands"
+	"github.com/wangfeiping/net_watcher/log"
 )
 
 func main() {
+	defer log.Flush()
+
+	viper.Set(commands.FlagConfig,
+		"./config.yml")
+
 	root := commands.NewRootCommand(versioner)
 	root.AddCommand(
-		// commands.NewStartCommand(nil, true),
-		// commands.NewAddCommand(nil, false),
-		// commands.NewCallCommand(nil, false),
+		commands.NewStartCommand(starter, true),
+		commands.NewAddCommand(addHandler),
+		commands.NewCallCommand(callHandler),
 		commands.NewVersionCommand(versioner))
 
 	if err := root.Execute(); err != nil {

@@ -26,9 +26,11 @@ const (
 
 // nolint
 const (
-	FlagLog     = "log"
-	FlagConfig  = "config"
-	FlagVersion = CmdVersion
+	FlagLog      = "log"
+	FlagConfig   = "config"
+	FlagURL      = "url"
+	FlegDuration = "duration"
+	FlagVersion  = CmdVersion
 )
 
 // Runner is command call function
@@ -71,7 +73,7 @@ func NewRootCommand(versioner Runner) *cobra.Command {
 		},
 	}
 
-	root.Flags().BoolP("version", "v", false, "Show version info")
+	root.Flags().BoolP(FlagVersion, "v", false, "Show version info")
 
 	return root
 }
