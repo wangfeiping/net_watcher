@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"strings"
@@ -14,7 +15,15 @@ func HTTPCall(URL string) (status int, err error) {
 	resp, err := http.Get(URL)
 	if err != nil {
 		log.Error("Failed, request error: ", err.Error())
-		return
+		if strings.Index(err.Error(),
+			"x509: certificate signed by unknown authority") < 0 {
+			return
+		}
+		resp, err = insecureHTTPCall(URL)
+		if err != nil {
+			log.Error("Failed, insecure request error: ", err.Error())
+			return
+		}
 	}
 	defer resp.Body.Close()
 	status = resp.StatusCode
@@ -38,4 +47,13 @@ func HTTPCall(URL string) (status int, err error) {
 	}
 	log.Infof("Success, status: %d, body: %s", resp.StatusCode, s)
 	return
+}
+
+// insecureHTTPCall request http(s) service with InsecureSkipVerify
+func insecureHTTPCall(URL string) (resp *http.Response, err error) {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	return client.Get(URL)
 }

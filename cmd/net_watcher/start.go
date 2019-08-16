@@ -39,10 +39,9 @@ var starter = func() (cancel context.CancelFunc, err error) {
 		log.Info("Config file changed:", e.Name)
 	})
 
-	doJob()
-
 	go func() {
 		wg.Add(1)
+		doJob()
 		for running {
 			select {
 			case <-t.C:

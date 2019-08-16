@@ -1,6 +1,7 @@
 package prometheus
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -13,7 +14,7 @@ func init() {
 		serviceStatusDesc: prometheus.NewDesc(
 			"network_service_status",
 			"Status code of network service response ",
-			[]string{"url"}, nil),
+			[]string{"code", "url"}, nil),
 		mapper: make(map[string]int)}
 }
 
@@ -40,22 +41,26 @@ func (c *watcherCollector) Collect(ch chan<- prometheus.Metric) {
 	c.mux.RLock()
 	defer c.mux.RUnlock()
 
-	for url, status := range c.mapper {
+	for url, code := range c.mapper {
+		up := 1
+		if code == 0 {
+			up = 0
+		}
 		ch <- prometheus.MustNewConstMetric(
 			c.serviceStatusDesc,
 			prometheus.GaugeValue,
-			float64(status), url)
+			float64(up), fmt.Sprintf("%d", code), url)
 	}
 }
 
-func (c *watcherCollector) setStatusCode(url string, status int) {
+func (c *watcherCollector) setStatusCode(url string, code int) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
-	c.mapper[url] = status
+	c.mapper[url] = code
 }
 
 // SetStatusCode set status code to the collector mapper
-func SetStatusCode(url string, status int) {
-	collector.setStatusCode(url, status)
+func SetStatusCode(url string, code int) {
+	collector.setStatusCode(url, code)
 }
