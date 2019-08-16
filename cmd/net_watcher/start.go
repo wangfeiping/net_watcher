@@ -16,12 +16,14 @@ import (
 var starter = func() (cancel context.CancelFunc, err error) {
 	log.Info("Start watch...")
 
+	running := true
 	t := time.NewTicker(time.Duration(
 		viper.GetInt64(commands.FlegDuration)) * time.Second)
 	var wg sync.WaitGroup
 	cancel = func() {
+		running = false
 		t.Stop()
-		log.Info("...")
+		log.Debug("...")
 		wg.Wait()
 		log.Info("Stop watch")
 	}
@@ -36,16 +38,21 @@ var starter = func() (cancel context.CancelFunc, err error) {
 	doJob()
 
 	go func() {
-		for {
+		wg.Add(1)
+		for running {
 			select {
 			case <-t.C:
 				{
-					wg.Add(1)
 					doJob()
-					wg.Done()
+				}
+			default:
+				{
+					time.Sleep(100 * time.Millisecond)
 				}
 			}
 		}
+		log.Debug("Done")
+		wg.Done()
 	}()
 	return
 }
