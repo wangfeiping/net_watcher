@@ -2,10 +2,14 @@ package main
 
 import (
 	"context"
+	"net/http"
 	"sync"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/wangfeiping/net_watcher/commands"
+	watcher "github.com/wangfeiping/net_watcher/prometheus"
 	"github.com/wangfeiping/net_watcher/util"
 
 	"github.com/fsnotify/fsnotify"
@@ -54,6 +58,11 @@ var starter = func() (cancel context.CancelFunc, err error) {
 		log.Debug("Done")
 		wg.Done()
 	}()
+
+	prometheus.MustRegister(watcher.Collector())
+
+	http.Handle("/metrics", promhttp.Handler())
+	log.Error(http.ListenAndServe(":8080", nil))
 	return
 }
 
@@ -62,8 +71,11 @@ func doJob() {
 	log.Debugf("Do watch: %d", len(urls))
 
 	for _, u := range urls {
-		ok, _ := util.HTTPCall(u)
-		log.Debugf("%t, %s", ok, u)
+		// ok, _ := util.HTTPCall(u)
+		// log.Debugf("%t, %s", ok, u)
+		status, _ := util.HTTPCall(u)
+		watcher.SetStatusCode(u, status)
+		log.Debugf("%d, %s", status, u)
 	}
 }
 

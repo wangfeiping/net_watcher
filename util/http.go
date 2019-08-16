@@ -10,13 +10,14 @@ import (
 )
 
 // HTTPCall request http(s) service
-func HTTPCall(URL string) (success bool, err error) {
+func HTTPCall(URL string) (status int, err error) {
 	resp, err := http.Get(URL)
 	if err != nil {
 		log.Error("Failed, request error: ", err.Error())
 		return
 	}
 	defer resp.Body.Close()
+	status = resp.StatusCode
 	buf := make([]byte, 100)
 	_, err = resp.Body.Read(buf)
 	if err != nil {
@@ -36,6 +37,5 @@ func HTTPCall(URL string) (success bool, err error) {
 		return
 	}
 	log.Infof("Success, status: %d, body: %s", resp.StatusCode, s)
-	success = true
 	return
 }
