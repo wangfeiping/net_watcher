@@ -74,6 +74,7 @@ func NewRootCommand(versioner Runner) *cobra.Command {
 	}
 
 	root.Flags().BoolP(FlagVersion, "v", false, "Show version info")
+	root.PersistentFlags().StringP(FlagConfig, "c", "./config.yml", "Config file path")
 
 	return root
 }

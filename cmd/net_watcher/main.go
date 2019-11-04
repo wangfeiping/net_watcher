@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/spf13/viper"
 	"github.com/wangfeiping/net_watcher/commands"
 	"github.com/wangfeiping/net_watcher/log"
 )
@@ -9,8 +8,8 @@ import (
 func main() {
 	defer log.Flush()
 
-	viper.Set(commands.FlagConfig,
-		"./config.yml")
+	// viper.Set(commands.FlagConfig,
+	// 	"./config.yml")
 
 	root := commands.NewRootCommand(versioner)
 	root.AddCommand(
