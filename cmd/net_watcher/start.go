@@ -61,7 +61,7 @@ var starter = func() (cancel context.CancelFunc, err error) {
 	prometheus.MustRegister(watcher.Collector())
 
 	http.Handle("/metrics", promhttp.Handler())
-	listen := viper.GetInt64(commands.FlagListen)
+	listen := viper.GetString(commands.FlagListen)
 	err = http.ListenAndServe(listen, nil)
 	log.Error(err)
 	return
