@@ -28,9 +28,10 @@ const (
 const (
 	FlagLog      = "log"
 	FlagConfig   = "config"
+	FlagListen   = "listen"
 	FlagURL      = "url"
 	FlegDuration = "duration"
-	FlagService = "service"
+	FlagService  = "service"
 	FlagVersion  = CmdVersion
 )
 
