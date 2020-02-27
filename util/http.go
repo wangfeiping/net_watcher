@@ -6,12 +6,27 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/wangfeiping/net_watcher/log"
 )
 
 // HTTPCall request http(s) service
-func HTTPCall(URL string) (status int, err error) {
+func HTTPCall(url string) (status int, cost int64) {
+	cost = time.Now().UnixNano()
+	var body string
+	status, body = doHTTPCall(url)
+	if status > 0 {
+		cost = time.Now().UnixNano() - cost
+		cost = cost / 1000000
+		log.Infof("Success, status: %d, cost: %d, body: %s", status, cost, body)
+	} else {
+		cost = 0
+	}
+	return
+}
+
+func doHTTPCall(URL string) (status int, body string) {
 	resp, err := http.Get(URL)
 	if err != nil {
 		log.Error("Failed, request error: ", err.Error())
@@ -39,13 +54,12 @@ func HTTPCall(URL string) (status int, err error) {
 	for _, s = range ss {
 		buffer.WriteString(s)
 	}
-	s = strings.ReplaceAll(buffer.String(), "\r", "")
+	body = strings.ReplaceAll(buffer.String(), "\r", "")
 	if resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf("Failed, status: %d, body: %s", resp.StatusCode, s)
+		err = fmt.Errorf("Failed, status: %d, body: %s", resp.StatusCode, body)
 		log.Error(err)
 		return
 	}
-	log.Infof("Success, status: %d, body: %s", resp.StatusCode, s)
 	return
 }
 

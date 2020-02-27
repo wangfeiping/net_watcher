@@ -9,7 +9,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/wangfeiping/net_watcher/commands"
-	watcher "github.com/wangfeiping/net_watcher/prometheus"
+	"github.com/wangfeiping/net_watcher/exporter"
 	"github.com/wangfeiping/net_watcher/util"
 
 	"github.com/fsnotify/fsnotify"
@@ -72,11 +72,9 @@ func doJob() {
 	log.Debugf("Do watch: %d", len(urls))
 
 	for _, u := range urls {
-		// ok, _ := util.HTTPCall(u)
-		// log.Debugf("%t, %s", ok, u)
-		status, _ := util.HTTPCall(u)
-		watcher.SetStatusCode(u, status)
-		log.Debugf("%d, %s", status, u)
+		status, cost := util.HTTPCall(u)
+		exporter.SetStatusCode(u, status, cost)
+		log.Debugf("Call: status %d, cost %d, %s", status, cost, u)
 	}
 }
 
