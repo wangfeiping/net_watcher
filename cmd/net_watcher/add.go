@@ -21,7 +21,7 @@ var addHandler = func() (cancel context.CancelFunc, err error) {
 	}
 
 	log.Debugf("Config add url: %d, %s", len(urls), url)
-	viper.Set("service", urls)
+	viper.Set(commands.FlagService, urls)
 	c := viper.GetString(commands.FlagConfig)
 	log.Debug("Config file: ", c)
 	if _, err = os.Stat(c); err == nil {
@@ -31,7 +31,11 @@ var addHandler = func() (cancel context.CancelFunc, err error) {
 		}
 		os.Rename(c, newFile)
 	}
-	err = viper.WriteConfig()
+	v := viper.New()
+	v.SetConfigFile(viper.GetString(commands.FlagConfig))
+	v.Set(commands.FlagService,
+		viper.GetStringSlice(commands.FlagService))
+	err = v.WriteConfig()
 	if err != nil {
 		log.Errorf("Write config file error: %v", err)
 	}
@@ -39,7 +43,7 @@ var addHandler = func() (cancel context.CancelFunc, err error) {
 }
 
 func addService(url string) (urls []string, err error) {
-	if err = viper.UnmarshalKey("service", &urls); err != nil {
+	if err = viper.UnmarshalKey(commands.FlagService, &urls); err != nil {
 		log.Errorf("Unmarshal config error: %v", err)
 		return
 	}

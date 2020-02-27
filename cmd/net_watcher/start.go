@@ -61,7 +61,8 @@ var starter = func() (cancel context.CancelFunc, err error) {
 	prometheus.MustRegister(watcher.Collector())
 
 	http.Handle("/metrics", promhttp.Handler())
-	log.Error(http.ListenAndServe(":8080", nil))
+	err = http.ListenAndServe(":8080", nil)
+	log.Error(err)
 	return
 }
 
@@ -85,7 +86,7 @@ func reloadServices() {
 	mux.Lock()
 	defer mux.Unlock()
 
-	if err := viper.UnmarshalKey("service", &urls); err != nil {
+	if err := viper.UnmarshalKey(commands.FlagService, &urls); err != nil {
 		log.Errorf("Reload config error: %v", err)
 		return
 	}

@@ -30,6 +30,7 @@ const (
 	FlagConfig   = "config"
 	FlagURL      = "url"
 	FlegDuration = "duration"
+	FlagService = "service"
 	FlagVersion  = CmdVersion
 )
 
