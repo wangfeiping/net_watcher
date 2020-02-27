@@ -50,7 +50,7 @@ func (c *watcherCollector) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(
 			c.serviceStatusDesc,
 			prometheus.GaugeValue,
-			float64(record.cost), fmt.Sprintf("%d", record.code), url)
+			float64(record.cost), fmt.Sprintf("%d", record.status), url)
 	}
 }
 
@@ -59,7 +59,7 @@ func (c *watcherCollector) setStatusCode(url string, code int, cost int64) {
 	defer c.mux.Unlock()
 
 	c.mapper[url] = &callRecord{
-		code: code,
+		status: code,
 		cost: cost}
 }
 
