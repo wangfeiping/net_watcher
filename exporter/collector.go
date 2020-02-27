@@ -15,7 +15,7 @@ func init() {
 			"network_service_status",
 			"Status code of network service response ",
 			[]string{"code", "url"}, nil),
-		mapper: make(map[string]int)}
+		mapper: make(map[string]*callRecord)}
 }
 
 type callRecord struct {
