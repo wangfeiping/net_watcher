@@ -18,10 +18,15 @@ func init() {
 		mapper: make(map[string]int)}
 }
 
+type callRecord struct {
+	status int
+	cost   int64
+}
+
 type watcherCollector struct {
 	serviceStatusDesc *prometheus.Desc
 
-	mapper map[string]int
+	mapper map[string]*callRecord
 	mux    sync.RWMutex
 }
 
@@ -41,26 +46,24 @@ func (c *watcherCollector) Collect(ch chan<- prometheus.Metric) {
 	c.mux.RLock()
 	defer c.mux.RUnlock()
 
-	for url, code := range c.mapper {
-		up := 1
-		if code == 0 {
-			up = 0
-		}
+	for url, record := range c.mapper {
 		ch <- prometheus.MustNewConstMetric(
 			c.serviceStatusDesc,
 			prometheus.GaugeValue,
-			float64(up), fmt.Sprintf("%d", code), url)
+			float64(record.cost), fmt.Sprintf("%d", record.code), url)
 	}
 }
 
-func (c *watcherCollector) setStatusCode(url string, code int) {
+func (c *watcherCollector) setStatusCode(url string, code int, cost int64) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
-	c.mapper[url] = code
+	c.mapper[url] = &callRecord{
+		code: code,
+		cost: cost}
 }
 
 // SetStatusCode set status code to the collector mapper
 func SetStatusCode(url string, code int, cost int64) {
-	collector.setStatusCode(url, code)
+	collector.setStatusCode(url, code, cost)
 }
