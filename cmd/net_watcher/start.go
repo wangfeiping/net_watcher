@@ -58,7 +58,7 @@ var starter = func() (cancel context.CancelFunc, err error) {
 		wg.Done()
 	}()
 
-	prometheus.MustRegister(watcher.Collector())
+	prometheus.MustRegister(exporter.Collector())
 
 	http.Handle("/metrics", promhttp.Handler())
 	listen := viper.GetString(commands.FlagListen)
