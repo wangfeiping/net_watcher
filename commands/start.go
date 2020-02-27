@@ -15,6 +15,6 @@ func NewStartCommand(run Runner, isKeepRunning bool) *cobra.Command {
 	}
 
 	cmd.Flags().Int64P(FlegDuration, "d", 30, "The cycle time of the watch task")
-	cmd.Flags().Int64P(FlagListen, "l", ":9900", "The listening address(ip:port) of exporter")
+	cmd.Flags().StringP(FlagListen, "l", ":9900", "The listening address(ip:port) of exporter")
 	return cmd
 }
