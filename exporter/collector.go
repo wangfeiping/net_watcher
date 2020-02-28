@@ -13,7 +13,7 @@ func init() {
 	collector = &watcherCollector{
 		serviceStatusDesc: prometheus.NewDesc(
 			"network_service_status",
-			"Status code of network service response ",
+			"Status of network service response ",
 			[]string{"code", "url"}, nil),
 		mapper: make(map[string]*callRecord)}
 }
@@ -60,7 +60,7 @@ func (c *watcherCollector) setStatusCode(url string, code int, cost int64) {
 
 	c.mapper[url] = &callRecord{
 		status: code,
-		cost: cost}
+		cost:   cost}
 }
 
 // SetStatusCode set status code to the collector mapper
