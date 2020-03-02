@@ -29,7 +29,7 @@ $ ./net_watcher start
 $ curl http://127.0.0.1:9900/metrics
 
 ```
-# HELP network_service_status Status code of network service response 
+# HELP network_service_status Status of network service response 
 # TYPE network_service_status gauge
 network_service_status{code="0",url="https://bing.c"} 0
 network_service_status{code="200",url="https://bing.com"} 331
