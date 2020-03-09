@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
+	"github.com/wangfeiping/log"
 	"github.com/wangfeiping/net_watcher/commands"
-	"github.com/wangfeiping/net_watcher/log"
 )
 
 var addHandler = func() (cancel context.CancelFunc, err error) {

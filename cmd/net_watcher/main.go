@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/wangfeiping/log"
 	"github.com/wangfeiping/net_watcher/commands"
-	"github.com/wangfeiping/net_watcher/log"
 )
 
 func main() {

@@ -10,7 +10,7 @@ import (
 	"github.com/cihub/seelog"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/wangfeiping/net_watcher/log"
+	"github.com/wangfeiping/log"
 )
 
 // nolint

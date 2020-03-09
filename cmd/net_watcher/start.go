@@ -14,7 +14,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
-	"github.com/wangfeiping/net_watcher/log"
+	"github.com/wangfeiping/log"
 )
 
 var starter = func() (cancel context.CancelFunc, err error) {

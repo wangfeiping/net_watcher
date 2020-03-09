@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wangfeiping/net_watcher/log"
+	"github.com/wangfeiping/log"
 )
 
 // HTTPCall request http(s) service
