@@ -7,7 +7,6 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/cihub/seelog"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/wangfeiping/log"
