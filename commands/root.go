@@ -97,13 +97,8 @@ func initConfig() error {
 }
 
 func initLogger() {
-	var logger seelog.LoggerInterface
-	logger, err := log.LoadLogger(viper.GetString("log"))
-	if err != nil {
-		log.Warn("Used the default logger because: ", err)
-	} else {
-		log.Replace(logger)
-	}
+	// log.Load(viper.GetString("log"))
+	log.Config(log.DefaultRollingFileConfig())
 }
 
 func commandRunner(run Runner, isKeepRunning bool) error {
