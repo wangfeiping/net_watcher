@@ -162,6 +162,10 @@ github.com/wangfeiping/log v0.0.1-zap h1:wXwDH02qlxF5pX+Bz2Xd445iUgd1JRix4xFKE7O
 github.com/wangfeiping/log v0.0.1-zap/go.mod h1:ufTWwEwftyVYMsS/ahGbpFA+14udtCWm3W6OG/6evyY=
 github.com/wangfeiping/log v0.0.2-zap h1:8qYLCdGUP4J09WEXL5J3kOokDzozI4Kl5AgQOW4NXEc=
 github.com/wangfeiping/log v0.0.2-zap/go.mod h1:ufTWwEwftyVYMsS/ahGbpFA+14udtCWm3W6OG/6evyY=
+github.com/wangfeiping/log v0.0.3-zap h1:mIeYMwij5iMXLbVbMIltFYrnl1v8TraM1Yl9kaglWWw=
+github.com/wangfeiping/log v0.0.3-zap/go.mod h1:ufTWwEwftyVYMsS/ahGbpFA+14udtCWm3W6OG/6evyY=
+github.com/wangfeiping/log v0.0.4-zap h1:+l1tFFqrHP+SdDCk6KT9zxcXeHQBRP9Lgm4632HT4t0=
+github.com/wangfeiping/log v0.0.4-zap/go.mod h1:ufTWwEwftyVYMsS/ahGbpFA+14udtCWm3W6OG/6evyY=
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=

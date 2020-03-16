@@ -29,14 +29,14 @@ func HTTPCall(url string) (status int, cost int64) {
 func doHTTPCall(URL string) (status int, body string) {
 	resp, err := http.Get(URL)
 	if err != nil {
-		log.Error("Failed, request error", "err",  err.Error())
+		log.Error("Failed, request error: ", err.Error())
 		if strings.Index(err.Error(),
 			"x509: certificate signed by unknown authority") < 0 {
 			return
 		}
 		resp, err = insecureHTTPCall(URL)
 		if err != nil {
-			log.Error("Failed, insecure request error", "err", err.Error())
+			log.Error("Failed, insecure request error: ", err.Error())
 			return
 		}
 	}
@@ -45,7 +45,7 @@ func doHTTPCall(URL string) (status int, body string) {
 	buf := make([]byte, 100)
 	_, err = resp.Body.Read(buf)
 	if err != nil {
-		log.Error("Failed, read response error", "err", err.Error())
+		log.Error("Failed, read response error: ", err.Error())
 		return
 	}
 	s := string(buf)
@@ -57,7 +57,7 @@ func doHTTPCall(URL string) (status int, body string) {
 	body = strings.ReplaceAll(buffer.String(), "\r", "")
 	if resp.StatusCode != http.StatusOK {
 		err = fmt.Errorf("Failed, status: %d, body: %s", resp.StatusCode, body)
-		log.Error("Failed, status code error", "status", resp.StatusCode)
+		log.Error(err.Error())
 		return
 	}
 	return
