@@ -8,5 +8,5 @@ require (
 	github.com/prometheus/client_golang v1.5.0
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/viper v1.6.2
-	github.com/wangfeiping/log v0.0.0-20200311062745-dbeccaf4bd46
+	github.com/wangfeiping/log v0.0.0-20200316030652-d88f194237c0
 )

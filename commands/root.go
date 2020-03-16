@@ -97,7 +97,7 @@ func initConfig() error {
 
 func initLogger() {
 	// log.Load(viper.GetString("log"))
-	log.Config(log.DefaultRollingFileConfig())
+	log.Config(log.RollingFileConfig())
 }
 
 func commandRunner(run Runner, isKeepRunning bool) error {
