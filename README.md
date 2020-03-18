@@ -126,14 +126,14 @@ message.tmpl
 
 ```
 {{ define "wechat.default.message" }}{{ range .Alerts }}start======
-{{ if eq .Status "firing" }}启动警报{{ else }}已恢复{{ end }} {{ .Status }}
+{{ if eq .Status "firing" }}Fire!Fire!Fire!{{ else }}resovled{{ end }} {{ .Status }}
 
-触发环境: 测试环境
-告警级别: {{ .Labels.severity }}
-告警主题: {{ .Annotations.summary }}
-触发时间: {{ .StartsAt.Format "2006-01-02T15:04:05" }}
-告警详情: {{ .Annotations.description }}
-数据标记:
+enviroment: test
+level: {{ .Labels.severity }}
+summary: {{ .Annotations.summary }}
+time: {{ .StartsAt.Format "2006-01-02T15:04:05" }}
+description: {{ .Annotations.description }}
+labels:
   {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }}
   {{end}}
 end========
