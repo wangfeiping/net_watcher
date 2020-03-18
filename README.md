@@ -75,3 +75,70 @@ rules.yml
       summary: "Url call out of time"
       description: "Url calling cost {{ $value }} milliseconds: {{$labels.url}}"
 ```
+
+alertmanager.yml
+
+```
+global:
+  resolve_timeout: 5m
+  wechat_api_url: 'https://qyapi.weixin.qq.com/cgi-bin/'
+  # wechat_api_corp_id: '************************'
+  # wechat_api_secret: '************************'
+templates:
+  - './message.tmpl'
+route:
+  group_by: ['service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 30m # 1h
+  receiver: 'wechat_prometheus'
+  routes:
+    # All alerts with service=mysql or service=cassandra
+    # are dispatched to the database pager.
+    - receiver: 'wechat_prometheus'
+      group_wait: 10s
+      continue: true
+      match:
+        team: devops
+    - receiver: 'wechat_test'
+      group_wait: 10s
+      continue: true
+      match:
+        team: devops
+receivers:
+- name: 'wechat_prometheus'
+  wechat_configs:
+  - send_resolved: true
+    corp_id: '************************'
+    to_user: '@all'
+    agent_id: '************************'
+    api_secret: '************************'
+- name: 'wechat_test'
+  wechat_configs:
+  - send_resolved: true
+    corp_id: '************************'
+    to_user: '@all'
+    agent_id: '************************'
+    api_secret: '************************'
+```
+
+message.tmpl
+
+```
+{{ define "wechat.default.message" }}{{ range .Alerts }}start======
+{{ if eq .Status "firing" }}启动警报{{ else }}已恢复{{ end }} {{ .Status }}
+
+触发环境: 测试环境
+告警级别: {{ .Labels.severity }}
+告警主题: {{ .Annotations.summary }}
+触发时间: {{ .StartsAt.Format "2006-01-02T15:04:05" }}
+告警详情: {{ .Annotations.description }}
+数据标记:
+  {{ range .Labels.SortedPairs }}{{ .Name }}={{ .Value }}
+  {{end}}
+end========
+
+{{ end }}
+{{ end }}
+```
+
