@@ -126,7 +126,7 @@ message.tmpl
 
 ```
 {{ define "wechat.default.message" }}{{ range .Alerts }}start======
-{{ if eq .Status "firing" }}Fire!Fire!Fire!{{ else }}resovled{{ end }} {{ .Status }}
+{{ if eq .Status "firing" }}Fire!Fire!Fire!{{ else }}Resovled{{ end }} {{ .Status }}
 
 enviroment: test
 level: {{ .Labels.severity }}
