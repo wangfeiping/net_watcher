@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"fmt"
+	"io"
 
 	// "io/ioutil"
 	"net/http"
@@ -44,14 +45,14 @@ func doHTTPCall(URL string) (status int, body string) {
 	}
 	defer resp.Body.Close()
 	status = resp.StatusCode
-	buf := make([]byte, 10)
-	_, err = resp.Body.Read(buf)
+	buf := bytes.NewBuffer(nil)
+	_, err = io.CopyN(buf, resp.Body, 100)
 	// response, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
+	if err != nil && err != io.EOF {
 		log.Error("Failed, read response error: ", err.Error())
 		return
 	}
-	s := string(buf)
+	s := string(buf.Bytes())
 	ss := strings.Split(s, "\n")
 	var buffer bytes.Buffer
 	for _, s = range ss {
