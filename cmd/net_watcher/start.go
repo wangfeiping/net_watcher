@@ -67,7 +67,7 @@ func doJob() {
 	log.Debugf("Do watch: %d", len(srvs))
 
 	for _, srv := range srvs {
-		status, cost := util.HTTPCall(srv.Url)
+		status, cost, _ := util.Call(srv)
 		exporter.SetStatusCode(srv, status, cost)
 	}
 }

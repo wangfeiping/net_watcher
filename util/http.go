@@ -12,66 +12,59 @@ import (
 	"time"
 
 	"github.com/wangfeiping/log"
+	"github.com/wangfeiping/net_watcher/config"
 )
 
-// HTTPCall request http(s) service
-func HTTPCall(url string) (status int, cost int64) {
+// Call request http(s) service
+func Call(srv *config.Service) (status int, cost int64, resp string) {
 	cost = time.Now().UnixNano()
-	var resp string
-	status, resp = doHTTPCall(url)
+	status, resp = doCall(srv)
 	if status > 0 {
 		cost = time.Now().UnixNano() - cost
 		cost = cost / 1000000
-		log.Infof("Success: status: %d, cost: %d, resp: %s", status, cost, resp)
+		log.Infof("Success, status: %d, cost: %d, resp: %s", status, cost, resp)
 	} else {
 		cost = 0
 	}
 	return
 }
 
-func doHTTPCall(URL string) (status int, body string) {
-	resp, err := http.Get(URL)
+func doCall(srv *config.Service) (status int, response string) {
+	var err error
+	var resp *http.Response
+	if strings.HasPrefix(srv.Url, "https://") {
+		resp, err = insecureCall(srv)
+	} else {
+		resp, err = http.Get(srv.Url)
+	}
 	if err != nil {
 		log.Error("Failed, request error: ", err.Error())
-		if strings.Index(err.Error(),
-			"x509: certificate signed by unknown authority") < 0 {
-			return
-		}
-		resp, err = insecureHTTPCall(URL)
-		if err != nil {
-			log.Error("Failed, insecure request error: ", err.Error())
-			return
-		}
+		return
 	}
 	defer resp.Body.Close()
-	status = resp.StatusCode
 	buf := bytes.NewBuffer(nil)
 	_, err = io.CopyN(buf, resp.Body, 100)
-	// response, err = ioutil.ReadAll(resp.Body)
 	if err != nil && err != io.EOF {
 		log.Error("Failed, read response error: ", err.Error())
 		return
 	}
-	s := string(buf.Bytes())
-	ss := strings.Split(s, "\n")
-	var buffer bytes.Buffer
-	for _, s = range ss {
-		buffer.WriteString(s)
-	}
-	body = strings.ReplaceAll(buffer.String(), "\r", "")
+	response = string(buf.Bytes())
+	response = strings.ReplaceAll(response, "\n", "")
+	response = strings.ReplaceAll(response, "\r", "")
 	if resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf("Failed, status: %d, body: %s", resp.StatusCode, body)
+		err = fmt.Errorf("Failed, status: %d, resp: %s", resp.StatusCode, response)
 		log.Error(err.Error())
 		return
 	}
+	status = resp.StatusCode
 	return
 }
 
-// insecureHTTPCall request http(s) service with InsecureSkipVerify
-func insecureHTTPCall(URL string) (resp *http.Response, err error) {
+// insecureCall request http(s) service with InsecureSkipVerify
+func insecureCall(srv *config.Service) (resp *http.Response, err error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
-	return client.Get(URL)
+	return client.Get(srv.Url)
 }
