@@ -67,5 +67,9 @@ func (c *watcherCollector) setStatusCode(url string, code int, cost int64) {
 
 // SetStatusCode set status code to the collector mapper
 func SetStatusCode(srv *config.Service, code int, cost int64) {
-	collector.setStatusCode(srv.Url, code, cost)
+	if srv.Alias == "" {
+		collector.setStatusCode(srv.Url, code, cost)
+	} else {
+		collector.setStatusCode(srv.Alias, code, cost)
+	}
 }

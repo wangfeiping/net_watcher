@@ -5,9 +5,9 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-
-	// "io/ioutil"
+	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -34,6 +34,29 @@ func doCall(srv *config.Service) (status int, response string) {
 	var resp *http.Response
 	if strings.HasPrefix(srv.Url, "https://") {
 		resp, err = insecureCall(srv)
+		if err != nil {
+			log.Error("Failed, insecure call error: ", err.Error())
+			return
+		}
+		defer resp.Body.Close()
+		if srv.Service != nil {
+			response, err = read(resp)
+			if err != nil {
+				log.Error("Failed, read response error: ", err.Error())
+				return
+			}
+			log.Debugf("status: %d, resp: %s", resp.StatusCode, response)
+			url, err := capture(response, "url")
+			if err != nil {
+				log.Error("Failed, capture data error: ", err.Error())
+				return
+			}
+			log.Debugf("Capture url: %s", url)
+			service := &config.Service{
+				Url: config.Check(srv.Service.Url, url)}
+			log.Debugf("Continue call url: %s", service.Url)
+			resp, err = insecureCall(service)
+		}
 	} else {
 		resp, err = http.Get(srv.Url)
 	}
@@ -42,6 +65,17 @@ func doCall(srv *config.Service) (status int, response string) {
 		return
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		response, err = read(resp)
+		if err != nil {
+			log.Error("Failed, read response error: ", err.Error())
+			return
+		}
+		err = fmt.Errorf("Failed, status: %d, resp: %s", resp.StatusCode, response)
+		log.Error(err.Error())
+		return
+	}
 	buf := bytes.NewBuffer(nil)
 	_, err = io.CopyN(buf, resp.Body, 100)
 	if err != nil && err != io.EOF {
@@ -51,11 +85,6 @@ func doCall(srv *config.Service) (status int, response string) {
 	response = string(buf.Bytes())
 	response = strings.ReplaceAll(response, "\n", "")
 	response = strings.ReplaceAll(response, "\r", "")
-	if resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf("Failed, status: %d, resp: %s", resp.StatusCode, response)
-		log.Error(err.Error())
-		return
-	}
 	status = resp.StatusCode
 	return
 }
@@ -66,5 +95,38 @@ func insecureCall(srv *config.Service) (resp *http.Response, err error) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
-	return client.Get(srv.Url)
+	if srv.Body == "" {
+		return client.Get(srv.Url)
+	}
+	req, err := http.NewRequest("GET", srv.Url, bytes.NewBuffer([]byte(srv.Body)))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	return client.Do(req)
+}
+
+func read(resp *http.Response) (response string, err error) {
+	var bytes []byte
+	bytes, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+	response = strings.ReplaceAll(string(bytes), "\n", "")
+	response = strings.ReplaceAll(response, "\r", "")
+	return
+}
+
+func capture(response, name string) (string, error) {
+	r := regexp.MustCompile(`"url":"(?P<url>.*?)"`)
+	groups := r.FindStringSubmatch(response)
+	// fmt.Printf("%#v\n", groups)
+	// fmt.Printf("%#v\n", r.SubexpNames())
+	// fmt.Printf("%s\n", groups[1])
+	for i, n := range r.SubexpNames() {
+		if strings.EqualFold(n, name) {
+			return groups[i], nil
+		}
+	}
+	return "", fmt.Errorf("name not found: %s", name)
 }

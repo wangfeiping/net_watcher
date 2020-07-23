@@ -46,3 +46,7 @@ func Load() {
 		log.Info("Config file changed:", e.Name)
 	})
 }
+
+func Check(data string, val ...string) string {
+	return val[0] + data[6:]
+}
