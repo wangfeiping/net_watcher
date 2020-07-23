@@ -4,24 +4,27 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+
 	"github.com/wangfeiping/log"
 	"github.com/wangfeiping/net_watcher/commands"
+	"github.com/wangfeiping/net_watcher/config"
 )
 
 var addHandler = func() (cancel context.CancelFunc, err error) {
 	url := viper.GetString(commands.FlagURL)
-	log.Debug("New service: ", url)
+	alias := viper.GetString(commands.FlagAlias)
+	body := viper.GetString(commands.FlagBody)
+	log.Debugf("New service: %s - %s", alias, url)
 
-	urls, err := addService(url)
+	srvs, err := addService(url, alias, body)
 	if err != nil {
 		return
 	}
-
-	log.Debugf("Config add url: %d, %s", len(urls), url)
-	viper.Set(commands.FlagService, urls)
+	viper.Set(commands.FlagService, srvs)
 	c := viper.GetString(commands.FlagConfig)
 	log.Debug("Config file: ", c)
 	if _, err = os.Stat(c); err == nil {
@@ -33,29 +36,33 @@ var addHandler = func() (cancel context.CancelFunc, err error) {
 	}
 	v := viper.New()
 	v.SetConfigFile(viper.GetString(commands.FlagConfig))
-	v.Set(commands.FlagService,
-		viper.GetStringSlice(commands.FlagService))
+	v.Set(commands.FlagService, srvs)
 	err = v.WriteConfig()
 	if err != nil {
-		log.Errorf("Write config file error: %v", err)
+		log.Errorf("Failed: write config file error: %v", err)
+	} else {
+		log.Infoz("Success: config add service",
+			zap.Field{Key: "url", String: url, Type: zapcore.StringType})
 	}
 	return
 }
 
-func addService(url string) (urls []string, err error) {
-	if err = viper.UnmarshalKey(commands.FlagService, &urls); err != nil {
+func addService(url, alias, body string) (srvs []*config.Service, err error) {
+	if err = viper.UnmarshalKey(commands.FlagService, &srvs); err != nil {
 		log.Errorf("Unmarshal config error: %v", err)
 		return
 	}
-	for i, u := range urls {
-		log.Debugf("Config urls: %d, %s", i, u)
-		if strings.EqualFold(u, url) {
-			err = fmt.Errorf("Service exist: %s", url)
-			log.Warn(err)
-			return
-		}
-	}
-	urls = append(urls, url)
+	// for i, u := range srvs {
+	// 	log.Debugf("Config urls: %d, %s", i, u)
+	// 	if strings.EqualFold(u, url) {
+	// 		err = fmt.Errorf("Service exist: %s", url)
+	// 		log.Warn(err)
+	// 		return
+	// 	}
+	// }
+	service := &config.Service{
+		Alias: alias, Url: url, Body: body}
+	srvs = append(srvs, service)
 	return
 }
 

@@ -5,6 +5,8 @@ import (
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/wangfeiping/net_watcher/config"
 )
 
 var collector *watcherCollector
@@ -64,6 +66,6 @@ func (c *watcherCollector) setStatusCode(url string, code int, cost int64) {
 }
 
 // SetStatusCode set status code to the collector mapper
-func SetStatusCode(url string, code int, cost int64) {
-	collector.setStatusCode(url, code, cost)
+func SetStatusCode(srv *config.Service, code int, cost int64) {
+	collector.setStatusCode(srv.Url, code, cost)
 }

@@ -28,7 +28,9 @@ const (
 	FlagLog      = "log"
 	FlagConfig   = "config"
 	FlagListen   = "listen"
+	FlagAlias    = "alias"
 	FlagURL      = "url"
+	FlagBody     = "body"
 	FlegDuration = "duration"
 	FlagService  = "service"
 	FlagVersion  = CmdVersion

@@ -8,13 +8,15 @@ import (
 func NewAddCommand(run Runner) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   CmdAdd,
-		Short: "Add a service url",
+		Short: "Add a service",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			run()
 			return nil
 		},
 	}
 
-	cmd.Flags().StringP(FlagURL, "u", "", "service url")
+	cmd.Flags().StringP(FlagAlias, "a", "", "service alias")
+	cmd.Flags().StringP(FlagURL, "u", "", "request url")
+	cmd.Flags().StringP(FlagBody, "b", "", "request body")
 	return cmd
 }
