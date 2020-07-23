@@ -8,13 +8,13 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/spf13/viper"
+
+	"github.com/wangfeiping/log"
 	"github.com/wangfeiping/net_watcher/commands"
 	"github.com/wangfeiping/net_watcher/config"
 	"github.com/wangfeiping/net_watcher/exporter"
 	"github.com/wangfeiping/net_watcher/util"
-
-	"github.com/spf13/viper"
-	"github.com/wangfeiping/log"
 )
 
 var starter = func() (cancel context.CancelFunc, err error) {
@@ -69,7 +69,5 @@ func doJob() {
 	for _, srv := range srvs {
 		status, cost := util.HTTPCall(srv.Url)
 		exporter.SetStatusCode(srv, status, cost)
-		log.Infof("Call: status %d, cost %d, %s, %s",
-			status, cost, srv.Alias, srv.Url)
 	}
 }

@@ -8,9 +8,6 @@ import (
 func main() {
 	defer log.Flush()
 
-	// viper.Set(commands.FlagConfig,
-	// 	"./config.yml")
-
 	root := commands.NewRootCommand(versioner)
 	root.AddCommand(
 		commands.NewStartCommand(starter, true),

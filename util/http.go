@@ -17,12 +17,12 @@ import (
 // HTTPCall request http(s) service
 func HTTPCall(url string) (status int, cost int64) {
 	cost = time.Now().UnixNano()
-	var body string
-	status, body = doHTTPCall(url)
+	var resp string
+	status, resp = doHTTPCall(url)
 	if status > 0 {
 		cost = time.Now().UnixNano() - cost
 		cost = cost / 1000000
-		log.Infof("Success, status: %d, cost: %d, body: %s", status, cost, body)
+		log.Infof("Success: status: %d, cost: %d, resp: %s", status, cost, resp)
 	} else {
 		cost = 0
 	}
