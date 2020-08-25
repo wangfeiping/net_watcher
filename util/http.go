@@ -64,6 +64,14 @@ func doCall(srv *config.Service) (status int, response string) {
 		log.Error("Failed, request error: ", err.Error())
 		return
 	}
+	if resp == nil {
+		log.Error("Failed, resp is nil")
+		return
+	}
+	if resp.Body == nil {
+		log.Error("Failed, resp.Body is nil")
+		return
+	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
