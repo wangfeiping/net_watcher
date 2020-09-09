@@ -46,7 +46,7 @@ func doCall(srv *config.Service) (status int, response string) {
 				return
 			}
 			log.Debugf("status: %d, resp: %s", resp.StatusCode, response)
-			url, err := capture(response, "url")
+			url, err := Capture(response, "url")
 			if err != nil {
 				log.Error("Failed, capture data error: ", err.Error())
 				return
@@ -125,14 +125,17 @@ func read(resp *http.Response) (response string, err error) {
 	return
 }
 
-func capture(response, name string) (string, error) {
+func Capture(response, name string) (string, error) {
 	r := regexp.MustCompile(`"url":"(?P<url>.*?)"`)
 	groups := r.FindStringSubmatch(response)
 	// fmt.Printf("%#v\n", groups)
 	// fmt.Printf("%#v\n", r.SubexpNames())
 	// fmt.Printf("%s\n", groups[1])
+	l := len(groups)
 	for i, n := range r.SubexpNames() {
-		if strings.EqualFold(n, name) {
+		if l <= i {
+			break
+		} else if strings.EqualFold(n, name) {
 			return groups[i], nil
 		}
 	}
