@@ -20,6 +20,7 @@ const (
 	CmdStart         = "start"
 	CmdAdd           = "add"
 	CmdCall          = "call"
+	CmdConfig        = "config"
 	CmdVersion       = "version"
 	CmdHelp          = "help"
 	ShortDescription = "Network service availability detection tools"
@@ -33,6 +34,7 @@ const (
 	FlagAlias    = "alias"
 	FlagURL      = "url"
 	FlagBody     = "body"
+	FlagMethod   = "method"
 	FlegDuration = "duration"
 	FlagService  = "service"
 	FlagVersion  = CmdVersion

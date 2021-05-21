@@ -18,9 +18,10 @@ var addHandler = func() (cancel context.CancelFunc, err error) {
 	url := viper.GetString(commands.FlagURL)
 	alias := viper.GetString(commands.FlagAlias)
 	body := viper.GetString(commands.FlagBody)
-	log.Debugf("New service: %s - %s", alias, url)
+	method := viper.GetString(commands.FlagMethod)
+	log.Debugf("New service: %s - %s %s", alias, url, method)
 
-	srvs, err := addService(url, alias, body)
+	srvs, err := addService(alias, url, method, body)
 	if err != nil {
 		return
 	}
@@ -47,7 +48,7 @@ var addHandler = func() (cancel context.CancelFunc, err error) {
 	return
 }
 
-func addService(url, alias, body string) (srvs []*config.Service, err error) {
+func addService(alias, url, method, body string) (srvs []*config.Service, err error) {
 	if err = viper.UnmarshalKey(commands.FlagService, &srvs); err != nil {
 		log.Errorf("Unmarshal config error: %v", err)
 		return
@@ -61,7 +62,7 @@ func addService(url, alias, body string) (srvs []*config.Service, err error) {
 	// 	}
 	// }
 	service := &config.Service{
-		Alias: alias, Url: url, Body: body}
+		Alias: alias, Url: url, Method: method, Body: body}
 	srvs = append(srvs, service)
 	return
 }
