@@ -58,7 +58,8 @@ func doCall(srv *config.Service) (status int, response string) {
 			resp, err = insecureCall(service)
 		}
 	} else {
-		resp, err = http.Get(srv.Url)
+		resp, err = httpCall(srv)
+
 	}
 	if err != nil {
 		log.Error("Failed, request error: ", err.Error())
@@ -103,15 +104,36 @@ func insecureCall(srv *config.Service) (resp *http.Response, err error) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
-	if srv.Body == "" {
-		return client.Get(srv.Url)
+
+	req, err := newRequest(srv)
+
+	return client.Do(req)
+}
+
+func httpCall(srv *config.Service) (*http.Response, error) {
+	req, err := newRequest(srv)
+	if err != nil {
+		return nil, err
 	}
-	req, err := http.NewRequest("GET", srv.Url, bytes.NewBuffer([]byte(srv.Body)))
+	return http.DefaultClient.Do(req)
+}
+
+func newRequest(srv *config.Service) (*http.Request, error) {
+	method := "GET"
+	if srv.Method != "" {
+		method = srv.Method
+	}
+
+	var body *bytes.Buffer
+	if srv.Body != "" {
+		body = bytes.NewBuffer([]byte(srv.Body))
+	}
+	req, err := http.NewRequest(method, srv.Url, body)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	return client.Do(req)
+	return req, nil
 }
 
 func read(resp *http.Response) (response string, err error) {

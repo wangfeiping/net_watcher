@@ -15,9 +15,6 @@ func NewAddCommand(run Runner) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringP(FlagURL, "u", "", "request url")
-	cmd.Flags().StringP(FlagBody, "b", "", "request body")
-	cmd.Flags().StringP(FlagAlias, "a", "", "service alias")
-	cmd.Flags().StringP(FlagMethod, "m", "GET", "http method")
+	serviceFlags(cmd)
 	return cmd
 }

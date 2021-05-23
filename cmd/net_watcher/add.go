@@ -15,13 +15,9 @@ import (
 )
 
 var addHandler = func() (cancel context.CancelFunc, err error) {
-	url := viper.GetString(commands.FlagURL)
-	alias := viper.GetString(commands.FlagAlias)
-	body := viper.GetString(commands.FlagBody)
-	method := viper.GetString(commands.FlagMethod)
-	log.Debugf("New service: %s - %s %s", alias, url, method)
+	srv := checkService()
 
-	srvs, err := addService(alias, url, method, body)
+	srvs, err := addService(srv)
 	if err != nil {
 		return
 	}
@@ -43,28 +39,30 @@ var addHandler = func() (cancel context.CancelFunc, err error) {
 		log.Errorf("Failed: write config file error: %v", err)
 	} else {
 		log.Infoz("Success: config add service",
-			zap.Field{Key: "url", String: url, Type: zapcore.StringType})
+			zap.Field{Key: "url", String: srv.Url, Type: zapcore.StringType})
 	}
 	return
 }
 
-func addService(alias, url, method, body string) (srvs []*config.Service, err error) {
+func addService(srv *config.Service) (srvs []*config.Service, err error) {
 	if err = viper.UnmarshalKey(commands.FlagService, &srvs); err != nil {
 		log.Errorf("Unmarshal config error: %v", err)
 		return
 	}
-	// for i, u := range srvs {
-	// 	log.Debugf("Config urls: %d, %s", i, u)
-	// 	if strings.EqualFold(u, url) {
-	// 		err = fmt.Errorf("Service exist: %s", url)
-	// 		log.Warn(err)
-	// 		return
-	// 	}
-	// }
-	service := &config.Service{
-		Alias: alias, Url: url, Method: method, Body: body}
-	srvs = append(srvs, service)
+	srvs = append(srvs, srv)
 	return
+}
+
+func checkService() *config.Service {
+	url := viper.GetString(commands.FlagURL)
+	alias := viper.GetString(commands.FlagAlias)
+	body := viper.GetString(commands.FlagBody)
+	method := viper.GetString(commands.FlagMethod)
+
+	srv := &config.Service{
+		Alias: alias, Url: url, Method: method, Body: body}
+	log.Debugf("checking service: %s - %s %s", srv.Alias, srv.Method, srv.Url)
+	return srv
 }
 
 func newPath(file string, i int) (newFile string, err error) {
