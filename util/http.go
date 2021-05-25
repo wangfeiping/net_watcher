@@ -3,6 +3,7 @@ package util
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -14,6 +15,11 @@ import (
 	"github.com/wangfeiping/log"
 	"github.com/wangfeiping/net_watcher/config"
 )
+
+// TODO
+type AnboResponse struct {
+	ErrorCode string `json:"errorCode,omitempty"`
+}
 
 // Call request http(s) service
 func Call(srv *config.Service) (status int, cost int64, resp string) {
@@ -59,7 +65,6 @@ func doCall(srv *config.Service) (status int, response string) {
 		}
 	} else {
 		resp, err = httpCall(srv)
-
 	}
 	if err != nil {
 		log.Error("Failed, request error: ", err.Error())
@@ -83,6 +88,33 @@ func doCall(srv *config.Service) (status int, response string) {
 		}
 		err = fmt.Errorf("Failed, status: %d, resp: %s", resp.StatusCode, response)
 		log.Error(err.Error())
+		return
+	}
+	// TODO
+	if strings.EqualFold(srv.Method, "POST") {
+		var bytes []byte
+		bytes, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Error("Failed, read response error: ", err.Error())
+			return
+		}
+		response = string(bytes)
+		response = strings.ReplaceAll(response, "\n", "")
+		response = strings.ReplaceAll(response, "\r", "")
+
+		anbo := &AnboResponse{}
+		err = json.Unmarshal(bytes, &anbo)
+		if err != nil {
+			log.Error("Failed, read response error: ", err.Error())
+			return
+		}
+		log.Info("error code: ", anbo.ErrorCode)
+		if !strings.EqualFold(anbo.ErrorCode, "0") {
+			log.Error("Anbo failed, errorCode: ", anbo.ErrorCode)
+			return
+		}
+		status = resp.StatusCode
+		log.Info("successed  errorCode: ", anbo.ErrorCode)
 		return
 	}
 	buf := bytes.NewBuffer(nil)
@@ -115,7 +147,8 @@ func httpCall(srv *config.Service) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	return http.DefaultClient.Do(req)
+	client := &http.Client{}
+	return client.Do(req)
 }
 
 func newRequest(srv *config.Service) (*http.Request, error) {
@@ -124,10 +157,7 @@ func newRequest(srv *config.Service) (*http.Request, error) {
 		method = srv.Method
 	}
 
-	var body *bytes.Buffer
-	if srv.Body != "" {
-		body = bytes.NewBuffer([]byte(srv.Body))
-	}
+	body := bytes.NewBuffer([]byte(srv.Body))
 	req, err := http.NewRequest(method, srv.Url, body)
 	if err != nil {
 		return nil, err
