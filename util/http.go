@@ -3,7 +3,6 @@ package util
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -15,11 +14,6 @@ import (
 	"github.com/wangfeiping/log"
 	"github.com/wangfeiping/net_watcher/config"
 )
-
-// TODO
-type AnboResponse struct {
-	ErrorCode string `json:"errorCode,omitempty"`
-}
 
 // Call request http(s) service
 func Call(srv *config.Service) (status int, cost int64, resp string) {
@@ -91,6 +85,11 @@ func doCall(srv *config.Service) (status int, response string) {
 		return
 	}
 	// TODO
+	r, err := regexp.Compile(srv.Regex)
+	if err != nil {
+		log.Error("regexp error: ", err.Error())
+		return
+	}
 	if strings.EqualFold(srv.Method, "POST") {
 		var bytes []byte
 		bytes, err = ioutil.ReadAll(resp.Body)
@@ -99,22 +98,11 @@ func doCall(srv *config.Service) (status int, response string) {
 			return
 		}
 		response = string(bytes)
-		response = strings.ReplaceAll(response, "\n", "")
-		response = strings.ReplaceAll(response, "\r", "")
-
-		anbo := &AnboResponse{}
-		err = json.Unmarshal(bytes, &anbo)
-		if err != nil {
-			log.Error("Failed, read response error: ", err.Error())
-			return
-		}
-		log.Info("error code: ", anbo.ErrorCode)
-		if !strings.EqualFold(anbo.ErrorCode, "0") {
-			log.Error("Anbo failed, errorCode: ", anbo.ErrorCode)
+		if !r.MatchString(string(bytes)) {
+			log.Warn("regex match failed: ", response)
 			return
 		}
 		status = resp.StatusCode
-		log.Info("successed  errorCode: ", anbo.ErrorCode)
 		return
 	}
 	buf := bytes.NewBuffer(nil)

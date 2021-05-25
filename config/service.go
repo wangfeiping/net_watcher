@@ -15,6 +15,7 @@ type Service struct {
 	Url     string   `json:"url" yaml:"url"`
 	Method  string   `json:"method,omitempty" yaml:"method,omitempty"`
 	Body    string   `json:"body,omitempty" yaml:"body,omitempty"`
+	Regex   string   `json:"regex,omitempty" yaml:"regex,omitempty"`
 	Service *Service `json:"service,omitempty" yaml:"service,omitempty"`
 }
 

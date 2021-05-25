@@ -58,9 +58,10 @@ func checkService() *config.Service {
 	alias := viper.GetString(commands.FlagAlias)
 	body := viper.GetString(commands.FlagBody)
 	method := viper.GetString(commands.FlagMethod)
+	regex := viper.GetString(commands.FlagRegex)
 
 	srv := &config.Service{
-		Alias: alias, Url: url, Method: method, Body: body}
+		Alias: alias, Url: url, Method: method, Body: body, Regex: regex}
 	log.Debugf("checking service: %s - %s %s", srv.Alias, srv.Method, srv.Url)
 	return srv
 }

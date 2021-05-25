@@ -35,6 +35,7 @@ const (
 	FlagURL      = "url"
 	FlagBody     = "body"
 	FlagMethod   = "method"
+	FlagRegex    = "regex"
 	FlegDuration = "duration"
 	FlagService  = "service"
 	FlagVersion  = CmdVersion
@@ -159,4 +160,6 @@ func serviceFlags(cmd *cobra.Command) {
 	cmd.Flags().StringP(FlagBody, "b", "", "request body")
 	cmd.Flags().StringP(FlagAlias, "a", "", "service alias")
 	cmd.Flags().StringP(FlagMethod, "m", "GET", "http method")
+	cmd.Flags().StringP(FlagRegex, "r", "GET", "match regex")
+
 }
