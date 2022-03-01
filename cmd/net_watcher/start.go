@@ -8,13 +8,13 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/spf13/viper"
+
+	"github.com/wangfeiping/log"
 	"github.com/wangfeiping/net_watcher/commands"
+	"github.com/wangfeiping/net_watcher/config"
 	"github.com/wangfeiping/net_watcher/exporter"
 	"github.com/wangfeiping/net_watcher/util"
-
-	"github.com/fsnotify/fsnotify"
-	"github.com/spf13/viper"
-	"github.com/wangfeiping/log"
 )
 
 var starter = func() (cancel context.CancelFunc, err error) {
@@ -31,13 +31,8 @@ var starter = func() (cancel context.CancelFunc, err error) {
 		wg.Wait()
 		log.Info("Stop watch")
 	}
-	reloadServices()
 
-	viper.WatchConfig()
-	viper.OnConfigChange(func(e fsnotify.Event) {
-		reloadServices()
-		log.Info("Config file changed:", e.Name)
-	})
+	config.Load()
 
 	go func() {
 		wg.Add(1)
@@ -68,32 +63,11 @@ var starter = func() (cancel context.CancelFunc, err error) {
 }
 
 func doJob() {
-	urls := getServices()
-	log.Debugf("Do watch: %d", len(urls))
+	srvs := config.GetServices()
+	log.Debugf("Do watch: %d", len(srvs))
 
-	for _, u := range urls {
-		status, cost := util.HTTPCall(u)
-		exporter.SetStatusCode(u, status, cost)
-		log.Debugf("Call: status %d, cost %d, %s", status, cost, u)
+	for _, srv := range srvs {
+		status, cost, _ := util.Call(srv)
+		exporter.SetStatusCode(srv, status, cost)
 	}
-}
-
-var mux sync.RWMutex
-var urls []string
-
-func reloadServices() {
-	mux.Lock()
-	defer mux.Unlock()
-
-	if err := viper.UnmarshalKey(commands.FlagService, &urls); err != nil {
-		log.Errorf("Reload config error: %v", err)
-		return
-	}
-}
-
-func getServices() []string {
-	mux.RLock()
-	defer mux.RUnlock()
-
-	return urls
 }

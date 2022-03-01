@@ -15,6 +15,6 @@ func NewCallCommand(run Runner) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringP(FlagURL, "u", "", "service url")
+	serviceFlags(cmd)
 	return cmd
 }

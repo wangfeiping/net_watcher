@@ -4,24 +4,24 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+
 	"github.com/wangfeiping/log"
 	"github.com/wangfeiping/net_watcher/commands"
+	"github.com/wangfeiping/net_watcher/config"
 )
 
 var addHandler = func() (cancel context.CancelFunc, err error) {
-	url := viper.GetString(commands.FlagURL)
-	log.Debug("New service: ", url)
+	srv := checkService()
 
-	urls, err := addService(url)
+	srvs, err := addService(srv)
 	if err != nil {
 		return
 	}
-
-	log.Debugf("Config add url: %d, %s", len(urls), url)
-	viper.Set(commands.FlagService, urls)
+	viper.Set(commands.FlagService, srvs)
 	c := viper.GetString(commands.FlagConfig)
 	log.Debug("Config file: ", c)
 	if _, err = os.Stat(c); err == nil {
@@ -33,30 +33,37 @@ var addHandler = func() (cancel context.CancelFunc, err error) {
 	}
 	v := viper.New()
 	v.SetConfigFile(viper.GetString(commands.FlagConfig))
-	v.Set(commands.FlagService,
-		viper.GetStringSlice(commands.FlagService))
+	v.Set(commands.FlagService, srvs)
 	err = v.WriteConfig()
 	if err != nil {
-		log.Errorf("Write config file error: %v", err)
+		log.Errorf("Failed: write config file error: %v", err)
+	} else {
+		log.Infoz("Success: config add service",
+			zap.Field{Key: "url", String: srv.Url, Type: zapcore.StringType})
 	}
 	return
 }
 
-func addService(url string) (urls []string, err error) {
-	if err = viper.UnmarshalKey(commands.FlagService, &urls); err != nil {
+func addService(srv *config.Service) (srvs []*config.Service, err error) {
+	if err = viper.UnmarshalKey(commands.FlagService, &srvs); err != nil {
 		log.Errorf("Unmarshal config error: %v", err)
 		return
 	}
-	for i, u := range urls {
-		log.Debugf("Config urls: %d, %s", i, u)
-		if strings.EqualFold(u, url) {
-			err = fmt.Errorf("Service exist: %s", url)
-			log.Warn(err)
-			return
-		}
-	}
-	urls = append(urls, url)
+	srvs = append(srvs, srv)
 	return
+}
+
+func checkService() *config.Service {
+	url := viper.GetString(commands.FlagURL)
+	alias := viper.GetString(commands.FlagAlias)
+	body := viper.GetString(commands.FlagBody)
+	method := viper.GetString(commands.FlagMethod)
+	regex := viper.GetString(commands.FlagRegex)
+
+	srv := &config.Service{
+		Alias: alias, Url: url, Method: method, Body: body, Regex: regex}
+	log.Debugf("checking service: %s - %s %s", srv.Alias, srv.Method, srv.Url)
+	return srv
 }
 
 func newPath(file string, i int) (newFile string, err error) {

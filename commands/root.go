@@ -3,7 +3,9 @@ package commands
 import (
 	"context"
 	"os"
+	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 
@@ -18,6 +20,7 @@ const (
 	CmdStart         = "start"
 	CmdAdd           = "add"
 	CmdCall          = "call"
+	CmdConfig        = "config"
 	CmdVersion       = "version"
 	CmdHelp          = "help"
 	ShortDescription = "Network service availability detection tools"
@@ -28,7 +31,11 @@ const (
 	FlagLog      = "log"
 	FlagConfig   = "config"
 	FlagListen   = "listen"
+	FlagAlias    = "alias"
 	FlagURL      = "url"
+	FlagBody     = "body"
+	FlagMethod   = "method"
+	FlagRegex    = "regex"
 	FlegDuration = "duration"
 	FlagService  = "service"
 	FlagVersion  = CmdVersion
@@ -96,8 +103,20 @@ func initConfig() error {
 }
 
 func initLogger() {
-	// log.Load(viper.GetString("log"))
 	log.Config(log.RollingFileConfig())
+	log.Infof("starting at %s", getExecPath())
+}
+
+// getExecPath returns the execution path
+func getExecPath() (execPath string) {
+	file, _ := exec.LookPath(os.Args[0])
+	execFile := filepath.Base(file)
+	execPath, _ = filepath.Abs(file)
+	if len(execPath) > 1 {
+		rs := []rune(execPath)
+		execPath = string(rs[0:(len(execPath) - len(execFile))])
+	}
+	return
 }
 
 func commandRunner(run Runner, isKeepRunning bool) error {
@@ -134,4 +153,13 @@ func keepRunning(callback func(sig os.Signal)) {
 		log.Flush()
 		os.Exit(1)
 	}
+}
+
+func serviceFlags(cmd *cobra.Command) {
+	cmd.Flags().StringP(FlagURL, "u", "", "request url")
+	cmd.Flags().StringP(FlagBody, "b", "", "request body")
+	cmd.Flags().StringP(FlagAlias, "a", "", "service alias")
+	cmd.Flags().StringP(FlagMethod, "m", "GET", "http method")
+	cmd.Flags().StringP(FlagRegex, "r", "GET", "match regex")
+
 }
