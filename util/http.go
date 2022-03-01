@@ -22,7 +22,7 @@ func Call(srv *config.Service) (status int, cost int64, resp string) {
 	if status > 0 {
 		cost = time.Now().UnixNano() - cost
 		cost = cost / 1000000
-		log.Infof("Success, status: %d, cost: %d, resp: %s", status, cost, resp)
+		log.Infof("Success, status: %d, cost: %d, method: %s, resp: %s", status, cost, srv.Method, resp)
 	} else {
 		cost = 0
 	}
@@ -45,7 +45,7 @@ func doCall(srv *config.Service) (status int, response string) {
 				log.Error("Failed, read response error: ", err.Error())
 				return
 			}
-			log.Debugf("status: %d, resp: %s", resp.StatusCode, response)
+			log.Debugf("status: %d, method: %s, resp: %s", resp.StatusCode, srv.Method, response)
 			url, err := Capture(response, "url")
 			if err != nil {
 				log.Error("Failed, capture data error: ", err.Error())
