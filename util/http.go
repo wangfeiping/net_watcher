@@ -85,33 +85,33 @@ func doCall(srv *config.Service) (status int, response string) {
 		return
 	}
 	// TODO
+	log.Warnf("regex: %s", srv.Regex)
 	r, err := regexp.Compile(srv.Regex)
 	if err != nil {
 		log.Error("regexp error: ", err.Error())
 		return
 	}
-	if strings.EqualFold(srv.Method, "POST") {
-		var bytes []byte
-		bytes, err = ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Error("Failed, read response error: ", err.Error())
-			return
-		}
-		response = string(bytes)
-		if !r.MatchString(string(bytes)) {
-			log.Warn("regex match failed: ", response)
-			return
-		}
-		status = resp.StatusCode
-		return
-	}
-	buf := bytes.NewBuffer(nil)
-	_, err = io.CopyN(buf, resp.Body, 100)
-	if err != nil && err != io.EOF {
+	var bytes []byte
+	bytes, err = io.ReadAll(resp.Body)
+	if err != nil {
 		log.Error("Failed, read response error: ", err.Error())
 		return
 	}
-	response = string(buf.Bytes())
+	response = string(bytes)
+	if !r.MatchString(response) {
+		log.Warn("regex match failed: ", response)
+		return
+	}
+	// buf := bytes.NewBuffer(nil)
+	// _, err = io.CopyN(buf, resp.Body, 100)
+	// if err != nil && err != io.EOF {
+	// 	log.Error("Failed, read response error: ", err.Error())
+	// 	return
+	// }
+	// response = buf.String()
+	if len(response) > 100 {
+		response = response[:100]
+	}
 	response = strings.ReplaceAll(response, "\n", "")
 	response = strings.ReplaceAll(response, "\r", "")
 	status = resp.StatusCode
